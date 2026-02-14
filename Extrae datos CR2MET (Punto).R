@@ -91,10 +91,7 @@ dict_netcdf <- setNames(variables, nombres_netcdf)
 # =====================================================================
 
 # PROCESAMIENTO DE INFO DE CADA NETCDF Y CADA ESTACION
-# 1) Se vuelve al directorio de trabajo original:
-#setwd("C:/Codigos/Extraer_CR2MET_punto") # Definicion directorio de trabajo. CAMBIAR
-
-# 2) Empieza el proceso de iteracion:
+# 1) Empieza el proceso de iteracion:
 for(nombre_archivo in names(dict_netcdf)) {
   variable <- dict_netcdf[nombre_archivo]
   
@@ -133,6 +130,8 @@ for(nombre_archivo in names(dict_netcdf)) {
     nombre_salida <- paste0(variable, "_", estacion_nombre, ".xlsx")
     
     # Guardar archivo
+    # Lo primero es volver al directorio de trabajo donde esta el codigo, aca queremos guardar las planillas.
+    setwd("C:/Codigos/Extraer_CR2MET_punto") # Definicion directorio de trabajo. CAMBIAR
     write.xlsx(cbind(fecha, aux), file=nombre_salida, overwrite = TRUE)
     
     cat("     Archivo guardado:", nombre_salida, "\n")
@@ -141,6 +140,9 @@ for(nombre_archivo in names(dict_netcdf)) {
   # Clausura de archivo netcdf
   nc_close(nc)
   cat("Archivo cerrado:", nombre_archivo, "\n")
+  
+  # Volvemos al directorio de los netcdf para empezar el ciclo nuevamente.
+  setwd(nc_files_CR2MET)
 }
 
 cat("\n¡Procesamiento completado!\n")
