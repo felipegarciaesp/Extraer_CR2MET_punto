@@ -16,7 +16,13 @@ library(openxlsx)
 # Lo que debes cambiar en el codigo se encuentra indicado como comentario.
 # En el directorio de trabajo debes tener una carpeta llamada "CR2MET" que contenga TODOS los archivos de los que quieres extraer informacion.
 
-setwd("C:/Codigos/Extraer_CR2MET_punto") # Definicion directorio de trabajo. CAMBIAR
+# 1) Define el directorio de trabajo, donde se encuentra el codigo y donde se guardaran los resultados.
+directorio_trabajo <- "C:/Codigos/Extraer_CR2MET_punto" # Definicion directorio de trabajo. CAMBIAR
+
+# 2) Define el directorio donde se encuentran los archivos .nc de CR2MET.
+nc_files_CR2MET <- "C:/Codigos/Extraer_CR2MET_punto/CR2MET" # Definicion carpeta de NETCDF. CAMBIAR
+
+setwd(directorio_trabajo) # Se identifica el directorio de trabajo
 getwd()
 
 # DEFINICION DE FUNCIONES
@@ -67,10 +73,7 @@ estaciones <- read.xlsx(paste0(getwd(), "/Puntos.xlsx"))
 
 # =====================================================================
 # LECTURA DE ARCHIVOS NETCDF EN CARPETA
-# 1) Directorio que contiene archivos netcdf:
-nc_files_CR2MET <- paste0(getwd(),"/CR2MET")
-
-# 2) Seteamos este directorio como el nuevo directorio de trabajo:
+# 1) Seteamos la ruta de los netcdf como el nuevo directorio de trabajo:
 setwd(nc_files_CR2MET)
 
 # 3) Lista de archivos netcdf en el directorio:
@@ -131,7 +134,7 @@ for(nombre_archivo in names(dict_netcdf)) {
     
     # Guardar archivo
     # Lo primero es volver al directorio de trabajo donde esta el codigo, aca queremos guardar las planillas.
-    setwd("C:/Codigos/Extraer_CR2MET_punto") # Definicion directorio de trabajo. CAMBIAR
+    setwd(directorio_trabajo)
     write.xlsx(cbind(fecha, aux), file=nombre_salida, overwrite = TRUE)
     
     cat("     Archivo guardado:", nombre_salida, "\n")
@@ -146,35 +149,3 @@ for(nombre_archivo in names(dict_netcdf)) {
 }
 
 cat("\n¡Procesamiento completado!\n")
-
-
-
-
-
-
-
-
-
-
-#name<-"CR2MET_tmin_v2_0_day_1979_2020_005deg.nc" #Nombre del archivo, debe tener extension. CAMBIAR
-#Salida<-'C:/Codigos/Extraer_CR2MET_punto/tmin_Iglesia_Colorada.xlsx' # Archivo de salida. CAMBIAR
-#nc<-nc_open(name)
-#data <- ncvar_get(nc, varid = "tmin") # Variable a extraer, debe coincidir con nombre del archivo. CAMBIAR
-##Coordenadas del punto a evaluar
-#QNlat<-(-28.1572) # Latitud en grados. CAMBIAR
-#QNlon<-(-69.8808) # Longitud en grados. CAMBIAR
-
-##Seleccion de grillas
-#corLat<-max(which(nc$dim$lat$vals<QNlat))
-#if ((QNlat-nc$dim$lat$vals[corLat])>(nc$dim$lat$vals[corLat+1]-QNlat)){
-#  corLat=corLat+1}
-
-#corLon<-max(which(nc$dim$lon$vals<QNlon))
-#if ((QNlon-nc$dim$lon$vals[corLon])>(nc$dim$lon$vals[corLon+1]-QNlon)){
-#  corLon=corLon+1}
-
-#aux<-as.data.frame(data[corLon,corLat, ])
-#fecha<-seq(as.Date("1979-01-01"), length=dim(aux)[1], by="day") # Fecha inicio archivo netcdf. CAMBIAR
-
-#write.xlsx(cbind(fecha,aux), file=Salida,overwrite = TRUE)
-
