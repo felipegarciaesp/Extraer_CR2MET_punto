@@ -14,13 +14,20 @@ library(openxlsx)
 # Ruta no tan larga y que no tengan un caracter especial.
 # Los slash deben ser como el siguiente: "/".
 # Lo que debes cambiar en el codigo se encuentra indicado como comentario.
-# En el directorio de trabajo debes tener una carpeta llamada "CR2MET" que contenga TODOS los archivos de los que quieres extraer informacion.
+# En el directorio de trabajo debes tener una carpeta "Inputs" con los .nc y el archivo Puntos.xlsx.
+# Los resultados se guardaran en la carpeta "Outputs".
 
 # 1) Define el directorio de trabajo, donde se encuentra el codigo y donde se guardaran los resultados.
 directorio_trabajo <- "C:/Codigos/Extraer_CR2MET_punto" # Definicion directorio de trabajo. CAMBIAR
 
-# 2) Define el directorio donde se encuentran los archivos .nc de CR2MET.
-nc_files_CR2MET <- "C:/Codigos/Extraer_CR2MET_punto/CR2MET" # Definicion carpeta de NETCDF. CAMBIAR
+# 2) Define carpetas de entrada y salida dentro del directorio de trabajo.
+input_dir <- file.path(directorio_trabajo, "Inputs")
+output_dir <- file.path(directorio_trabajo, "Outputs")
+
+# Crear carpeta de salida si no existe
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir, recursive = TRUE)
+}
 
 setwd(directorio_trabajo) # Se identifica el directorio de trabajo
 getwd()
@@ -101,16 +108,16 @@ extraer_serie_punto <- function(nc, variable, corLon, corLat) {
 # =====================================================================
 # LECTURA DE ARCHIVO EXCEL CON ESTACIONES Y SUS COORDENADAS
 # 1) Lectura de archivo Excel:
-estaciones <- read.xlsx(paste0(getwd(), "/Puntos.xlsx"))
+estaciones <- read.xlsx(file.path(input_dir, "Puntos.xlsx"))
 
 # =====================================================================
 # LECTURA DE ARCHIVOS NETCDF EN CARPETA
 # 1) Seteamos la ruta de los netcdf como el nuevo directorio de trabajo:
-setwd(nc_files_CR2MET)
+setwd(input_dir)
 
 # 3) Lista de archivos netcdf en el directorio:
 # Este codigo va a arrojar una lista con la ruta completa, desde C:/User/Usuario ...
-archivos <- list.files(nc_files_CR2MET, pattern ="\\.nc$", full.names = TRUE)
+archivos <- list.files(input_dir, pattern ="\\.nc$", full.names = TRUE)
 
 # 4) Obtener solo los nombres de los archivos:
 nombres_netcdf <- basename(archivos)
@@ -165,9 +172,7 @@ for(nombre_archivo in names(dict_netcdf)) {
     nombre_salida <- paste0(variable, "_", estacion_nombre, ".xlsx")
     
     # Guardar archivo
-    # Lo primero es volver al directorio de trabajo donde esta el codigo, aca queremos guardar las planillas.
-    setwd(directorio_trabajo)
-    write.xlsx(cbind(fecha, aux), file=nombre_salida, overwrite = TRUE)
+    write.xlsx(cbind(fecha, aux), file=file.path(output_dir, nombre_salida), overwrite = TRUE)
     
     cat("     Archivo guardado:", nombre_salida, "\n")
   }
@@ -177,7 +182,7 @@ for(nombre_archivo in names(dict_netcdf)) {
   cat("Archivo cerrado:", nombre_archivo, "\n")
   
   # Volvemos al directorio de los netcdf para empezar el ciclo nuevamente.
-  setwd(nc_files_CR2MET)
+  setwd(input_dir)
 }
 
 cat("\n¡Procesamiento completado!\n")
