@@ -66,6 +66,38 @@ UM_variable <- function(variable) {
   return(UM)
 }
 
+# Extrae solo la serie temporal del punto solicitado, evitando cargar todo el cubo en memoria
+extraer_serie_punto <- function(nc, variable, corLon, corLat) {
+  var_obj <- nc$var[[variable]]
+  dim_names <- tolower(sapply(var_obj$dim, function(d) d$name))
+  n_dims <- length(dim_names)
+  
+  if (n_dims < 2) {
+    stop(paste("La variable", variable, "no tiene dimensiones espaciales esperadas."))
+  }
+  
+  start <- rep(1, n_dims)
+  count <- rep(1, n_dims)
+  
+  idx_lon <- which(dim_names %in% c("lon", "longitude", "x"))
+  idx_lat <- which(dim_names %in% c("lat", "latitude", "y"))
+  idx_time <- which(dim_names %in% c("time", "t"))
+  
+  if (length(idx_lon) == 0 || length(idx_lat) == 0) {
+    stop(paste("No se encontraron dimensiones lon/lat en la variable", variable))
+  }
+  
+  start[idx_lon[1]] <- corLon
+  start[idx_lat[1]] <- corLat
+  
+  if (length(idx_time) > 0) {
+    count[idx_time[1]] <- -1
+  }
+  
+  serie <- ncvar_get(nc, varid = variable, start = start, count = count)
+  as.vector(serie)
+}
+
 # =====================================================================
 # LECTURA DE ARCHIVO EXCEL CON ESTACIONES Y SUS COORDENADAS
 # 1) Lectura de archivo Excel:
@@ -117,9 +149,9 @@ for(nombre_archivo in names(dict_netcdf)) {
     # Obtener coordenadas de grilla
     coords <- coordenadas(nc, lat, lon)
     
-    # Extraer datos de la variable
-    data <- ncvar_get(nc, varid = variable)
-    aux <- as.data.frame(data[coords$corLon, coords$corLat, ])
+    # Extraer solo la serie temporal del punto (sin cargar todo el netcdf)
+    serie <- extraer_serie_punto(nc, variable, coords$corLon, coords$corLat)
+    aux <- data.frame(valor = serie)
     
     # Crear encabezado con variable y unidad de medida
     unidad <- UM_variable(variable)
