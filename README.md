@@ -88,3 +88,7 @@ porque extrae solo la serie temporal del punto solicitado usando lectura parcial
 ## Autor
 
 - Felipe Garcia
+
+## FUTURAS MEJORAS
+
+- Que se genere nuevamente la carpeta Outputs cada vez que se ejecute el código, para evitar que hayan resultados de alguna corrida anterior.
